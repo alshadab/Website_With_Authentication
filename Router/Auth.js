@@ -1,11 +1,9 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+
 const User = require("../Model/UserRegSchema");
 
-const { response } = require("express");
 const router = express.Router();
-const SECRET_KEY = process.env.SECRET_KEY;
 
 const authenticate = require("../Middleware/Authenticate");
 
@@ -68,7 +66,7 @@ router.post("/signin", async (req, res) => {
     res.send(err.message);
   }
 });
-
+//Get user
 router.get("/get", authenticate, async (req, res) => {
   try {
     res.json(req.MainUser);
@@ -77,4 +75,43 @@ router.get("/get", authenticate, async (req, res) => {
   }
 });
 
+//Set Message
+router.post("/contact", authenticate, async (req, res) => {
+  try {
+    const { name, email, phone, message } = req.body;
+    if (!name || !email || !phone || !message) {
+      return res.status(400).json({ error: "Please Fillup The Form" });
+    }
+    const userInfo = await User.findOne({ _id: req.userId });
+    if (userInfo) {
+      const UserMessage = await userInfo.addMessage(
+        name,
+        email,
+        phone,
+        message
+      );
+      await userInfo.save();
+
+      res.status(201).json("Message Send Successfully");
+    }
+  } catch (err) {
+    console.log(err);
+    res.send(err.message);
+  }
+});
+
+router.get("/mess/:id", async (req, res) => {
+  try {
+    const _id = req.params.id;
+    let i;
+    const user = await User.findById(_id);
+    if (user) {
+      res.send(user.messages);
+    } else {
+      res.status(404).json("Message Not Found");
+    }
+  } catch (err) {
+    console.log(err);
+  }
+});
 module.exports = router;
