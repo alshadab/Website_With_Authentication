@@ -99,7 +99,7 @@ router.post("/contact", authenticate, async (req, res) => {
     res.send(err.message);
   }
 });
-
+//Get info By ID
 router.get("/mess/:id", async (req, res) => {
   try {
     const _id = req.params.id;
@@ -114,4 +114,15 @@ router.get("/mess/:id", async (req, res) => {
     console.log(err);
   }
 });
+
+//Logout
+router.get("/logout", async (req, res) => {
+  try {
+    res.clearCookie("logtoken");
+    res.status(200).send("Logout Success");
+  } catch (err) {
+    res.send(err.message);
+  }
+});
+
 module.exports = router;
